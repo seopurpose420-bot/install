@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Install Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;padding:15px;background:#f5f5f5}
+h1{font-size:20px;margin-bottom:15px}
+input,button{width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:4px;font-size:16px}
+button{background:#4CAF50;color:white;border:none;font-weight:bold}
+.section{background:white;padding:15px;margin:15px 0;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+.total{font-size:24px;font-weight:bold;color:#4CAF50;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px;border:1px solid #ddd;text-align:left}
+th{background:#f2f2f2}
+.copy{background:#FF9800;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>Install Tracker</h1>
+<input type="text" id="code" placeholder="displayads">
+<input type="date" id="start">
+<input type="date" id="end">
+<button onclick="fetchData()">Fetch</button>
+<div id="out"></div>
+<script>
+let d='';
+async function fetchData(){
+const c=document.getElementById('code').value.trim();
+if(!c){alert('Enter code');return;}
+document.getElementById('out').innerHTML='<p>Loading...</p>';
+try{
+const r=await fetch('/api/track?code='+c);
+const j=await r.json();
+if(j.status===1){
+const s=document.getElementById('start').value;
+const e=document.getElementById('end').value;
+let days=j.data['Day wise data']||[];
+if(s||e)days=days.filter(i=>{const dt=new Date(i.day);return(!s||dt>=new Date(s))&&(!e||dt<=new Date(e));});
+days.sort((a,b)=>new Date(b.day)-new Date(a.day));
+const t=days.reduce((sum,i)=>sum+i.referrals,0);
+let h='<div class="section"><h3>'+c.toUpperCase()+'</h3><div class="total">Total: '+t+'</div><table><thead><tr><th>Date</th><th>Installs</th></tr></thead><tbody>';
+d=c.toUpperCase()+'\nTotal: '+t+'\n\nDate\tInstalls\n';
+days.forEach(i=>{h+='<tr><td>'+i.day+'</td><td>'+i.referrals+'</td></tr>';d+=i.day+'\t'+i.referrals+'\n';});
+h+='</tbody></table></div><button class="copy" onclick="copy()">Copy</button>';
+document.getElementById('out').innerHTML=h;
+}
+}catch(e){document.getElementById('out').innerHTML='<p style="color:red">Error: '+e.message+'</p>';}
+}
+function copy(){navigator.clipboard.writeText(d).then(()=>alert('Copied!'));}
+</script>
+</body>
+</html>
