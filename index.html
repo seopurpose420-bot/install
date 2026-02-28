@@ -31,7 +31,7 @@ const c=document.getElementById('code').value.trim();
 if(!c){alert('Enter code');return;}
 document.getElementById('out').innerHTML='<p>Loading...</p>';
 try{
-const r=await fetch('/api/track?code='+c);
+const r=await fetch('https://install-one.vercel.app/api/track?code='+c);
 const j=await r.json();
 if(j.status===1){
 const s=document.getElementById('start').value;
